@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis Residuos · Sodimac Chile</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+<style>
+/* ── Recylink Design System ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gray-25:  #FCFCFD;
+  --gray-50:  #F9FAFB;
+  --gray-100: #F2F4F7;
+  --gray-200: #E4E7EC;
+  --gray-300: #D0D5DD;
+  --gray-400: #98A2B3;
+  --gray-500: #667085;
+  --gray-600: #475467;
+  --gray-700: #344054;
+  --gray-800: #1D2939;
+  --gray-900: #101828;
+  --gray-950: #0C111D;
+
+  --primary-200: #B3DFF5;
+  --primary-500: #0083C0;
+  --primary-600: #0069A6;
+  --primary-700: #00528B;
+
+  --secondary-500: #5925DC;
+  --secondary-600: #4A1FB8;
+  --secondary-200: #D9D6FE;
+
+  --error:         #F04438;
+  --warning:       #F79009;
+  --success:       #039855;
+  --error-light:   #FEE4E2;
+  --warning-light: #FEF0C7;
+  --success-light: #D1FADF;
+
+  --bg:             var(--gray-25);
+  --bg-subtle:      var(--gray-50);
+  --bg-muted:       var(--gray-100);
+  --border:         var(--gray-200);
+  --border-strong:  var(--gray-300);
+  --text:           var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-disabled:  var(--gray-400);
+  --brand:          var(--primary-600);
+  --brand-hover:    var(--primary-500);
+  --brand-pressed:  var(--primary-700);
+  --brand-light:    #E6F2F9;
+
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow-md: 0 4px 8px rgba(16,24,40,0.08);
+  --shadow-lg: 0 12px 24px rgba(16,24,40,0.10);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-muted);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: none; border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  padding: 10px 18px; line-height: 1;
+}
+.btn-primary          { background: var(--brand); color: #fff; }
+.btn-primary:hover    { background: var(--brand-hover); }
+.btn-primary:active   { background: var(--brand-pressed); }
+.btn-secondary        { background: #fff; color: var(--brand); border: 1.5px solid var(--border); }
+.btn-secondary:hover  { background: var(--bg-subtle); }
+.btn-ghost            { background: transparent; color: var(--brand); }
+.btn-ghost:hover      { background: var(--bg-muted); }
+.btn-sm  { padding: 8px 14px; font-size: 13px; border-radius: 6px; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1.5px solid var(--border); background: var(--gray-25); padding: 0 1.25rem; }
+.tab {
+  padding: 10px 16px; font-size: 14px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer;
+  border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.15s;
+}
+.tab:hover  { color: var(--brand); }
+.tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+.tab-panel        { display: none; }
+.tab-panel.active { display: block; }
+
+/* Cards */
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; background: var(--gray-25);
+}
+.card-title { font-size: 13px; font-weight: 700; color: var(--gray-800); }
+.card-body  { padding: 1.25rem; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.badge-primary { background: var(--primary-200);  color: var(--primary-700); }
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-error   { background: var(--error-light);   color: var(--error); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-gray    { background: var(--gray-100);      color: var(--gray-700); }
+
+/* Inputs */
+.input {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--text); background: #fff; outline: none; transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,105,166,0.12); }
+
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ── Layout ── */
+.topbar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.tag-pill {
+  background: var(--brand-light); color: var(--brand);
+  font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+}
+
+.page { max-width: 1120px; margin: 0 auto; padding: 2rem; }
+
+.breadcrumb { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.breadcrumb span { color: var(--gray-600); font-weight: 500; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.page-sub   { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+/* Metrics */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 1.5rem; }
+.metric-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);
+}
+.metric-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.metric-value { font-size: 28px; font-weight: 700; line-height: 1; }
+.mv-brand   { color: var(--brand); }
+.mv-danger  { color: var(--error); }
+.mv-success { color: var(--success); }
+.metric-sub { font-size: 11px; color: var(--text-disabled); margin-top: 4px; font-weight: 500; }
+.metric-bar      { height: 3px; border-radius: 2px; background: var(--gray-200); margin-top: 12px; }
+.metric-bar-fill { height: 3px; border-radius: 2px; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.legend-dot  { width: 8px; height: 8px; border-radius: 3px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: var(--gray-50); }
+th {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+  cursor: pointer; user-select: none;
+}
+th:hover { color: var(--gray-800); background: var(--bg-muted); }
+th.num { text-align: right; }
+.si { margin-left: 3px; opacity: 0.35; }
+th.sort-asc .si, th.sort-desc .si { opacity: 1; color: var(--brand); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--gray-700); font-weight: 500; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-25); }
+.store-name { color: var(--gray-900); font-weight: 600; }
+.cc-badge {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 2px 7px; border-radius: 6px;
+  background: var(--gray-100); color: var(--gray-600);
+}
+
+/* Status badges (table) */
+.badge.alto       { background: var(--error-light);   color: #B42318; }
+.badge.medio      { background: var(--warning-light); color: #B54708; }
+.badge.eficiente  { background: var(--success-light); color: #027A48; }
+
+/* Mini bar */
+.bar-wrap { display: flex; align-items: center; gap: 8px; }
+.bar-bg   { background: var(--gray-200); height: 6px; border-radius: 3px; width: 80px; }
+.bar-fill { height: 6px; border-radius: 3px; }
+
+/* Factors */
+.factors-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.factor-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.factor-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; border-radius: 12px 0 0 12px;
+}
+.fc1::before { background: var(--brand); }
+.fc2::before { background: #6172F3; }
+.fc3::before { background: var(--error); }
+.fc4::before { background: var(--warning); }
+.fc5::before { background: var(--success); }
+.fc6::before { background: var(--gray-300); }
+.factor-num   { font-size: 11px; font-weight: 600; color: var(--text-disabled); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.factor-title { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+.factor-body  { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+.factor-tag {
+  display: inline-block; margin-top: 10px; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--brand-light); color: var(--brand);
+}
+
+/* Insight */
+.insight {
+  background: var(--brand-light); border: 1px solid #B3D6EB;
+  border-radius: 8px; padding: 0.875rem 1rem;
+  font-size: 13px; color: var(--gray-700); margin-bottom: 1.25rem;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.insight strong { color: var(--brand); font-weight: 700; }
+
+/* Chart */
+.chart-wrap { position: relative; width: 100%; height: 1650px; }
+
+/* Footer */
+.footer { text-align: center; padding: 1.5rem; font-size: 12px; color: var(--text-disabled); font-weight: 500; }
+
+
+
+  body { background: #fff !important; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .topbar { position: static; box-shadow: none; border-bottom: 1px solid var(--border); padding: 0 1rem; height: 44px; }
+  @media print { .no-print { display: none !important; } }
+
+  /* Show all tabs for print */
+  .tabs { display: none !important; }
+  .tab-panel { display: block !important; }
+
+  .card { box-shadow: none; border: 1px solid var(--border); margin-bottom: 10px; }
+  .metrics { grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 10px; }
+  .metric-card { padding: 10px; }
+  .metric-value { font-size: 22px; }
+
+  #tab-chart { page-break-before: avoid; }
+  #tab-chart .card-header { padding: 6px 10px; }
+  #tab-chart .card-body { padding: 0 !important; }
+  #chartWrap1 { height: 966px !important; width: 100% !important; page-break-inside: avoid; }
+  #chartWrap2 { page-break-before: always; height: 684px !important; width: 100% !important; margin-top: 0; }
+
+  /* Table on new page */
+  #tab-table {
+    page-break-before: always;
+  }
+  #tab-table table { font-size: 10px; }
+  #tab-table th, #tab-table td { padding: 5px 8px; }
+
+  /* Factors on new page */
+  #tab-factors {
+    page-break-before: always;
+  }
+  .factors-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .factor-card { padding: 10px 10px 10px 14px; page-break-inside: avoid; }
+  .factor-body { font-size: 11px; }
+
+  .footer { padding: 6px; font-size: 10px; }
+}
+
+@media (max-width: 700px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .factors-grid { grid-template-columns: 1fr; }
+  .page { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo" style="display:flex;align-items:center;">
+    <svg style="height:34px;width:auto;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 500 92" style="enable-background:new 0 0 500 92;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#009D4F;}
+	.st1{fill:#BADF93;}
+	.st2{fill:#007934;}
+	.st3{fill:#76BC21;}
+	.st4{fill:#C2D500;}
+	.st5{fill:#00AE42;}
+	.st6{fill:#6AAAE4;}
+	.st7{fill:#00538B;}
+	.st8{fill:#7BADD3;}
+	.st9{fill:#BDD4E7;}
+	.st10{fill:#0083C1;}
+	.st11{fill:#4AC1E0;}
+	.st12{fill:#0069A7;}
+</style>
+<g>
+	<g>
+		<g>
+			<g id="XMLID_190_">
+				<g id="XMLID_192_">
+					
+						<rect id="XMLID_198_" x="39.1" y="5.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 96.1313 -8.0088)" class="st0" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_197_" x="24.1" y="20.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 81.122 28.227)" class="st1" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_196_" x="9.1" y="35.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 66.1126 64.4629)" class="st2" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_195_" x="54.1" y="20.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 132.3672 7.0006)" class="st3" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_194_" x="24.1" y="50.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 102.3484 79.4723)" class="st3" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_193_" x="39.1" y="65.3" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 138.562 94.4909)" class="st4" width="21.2" height="21.2"/>
+				</g>
+				<polygon id="XMLID_191_" class="st5" points="64.7,45.9 49.7,60.9 64.7,75.9 79.7,60.9 79.9,45.7 				"/>
+			</g>
+			<g id="XMLID_181_">
+				<g id="XMLID_183_">
+					
+						<rect id="XMLID_189_" x="99.3" y="65.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -21.5068 99.9632)" class="st6" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_188_" x="114.3" y="50.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -6.4974 106.1803)" class="st7" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_187_" x="129.3" y="35.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 8.512 112.3974)" class="st8" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_186_" x="84.3" y="50.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -15.2897 84.9539)" class="st9" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_185_" x="114.3" y="20.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 14.7291 97.388)" class="st10" width="21.2" height="21.2"/>
+					
+						<rect id="XMLID_184_" x="99.3" y="5.3" transform="matrix(0.7071 -0.7071 0.7071 0.7071 20.95 82.3879)" class="st11" width="21.2" height="21.2"/>
+				</g>
+				<polygon id="XMLID_182_" class="st12" points="94.9,15.9 79.9,30.9 79.7,46.1 94.9,45.9 109.9,30.9 				"/>
+			</g>
+		</g>
+		<g>
+			<g>
+				<path class="st12" d="M324.4,22.7h13.1v36h22.1v10.4h-35.3V22.7z"/>
+				<path class="st12" d="M366.2,22.7h13.1v46.4h-13.1V22.7z"/>
+				<path class="st12" d="M430.1,22.7v46.4h-10.8l-20.5-24.7v24.7H386V22.7h10.8l20.5,24.7V22.7H430.1z"/>
+				<path class="st12" d="M454.6,52.3l-4.9,5.2v11.6h-13V22.7h13V42l18-19.3h14.4l-19,20.5l20,25.8h-15.2L454.6,52.3z"/>
+			</g>
+			<g>
+				<path class="st5" d="M190.9,68.6l-9.8-13.9c-1.2,0.1-2.2,0.1-2.9,0.1H167v13.8h-6.5V23.2h17.7c5.9,0,10.5,1.4,13.9,4.2
+					c3.4,2.8,5.1,6.7,5.1,11.6c0,3.5-0.9,6.5-2.6,8.9c-1.7,2.5-4.2,4.3-7.4,5.4l10.8,15.2H190.9z M187.4,46.6
+					c2.2-1.8,3.2-4.3,3.2-7.6c0-3.3-1.1-5.8-3.2-7.5c-2.2-1.7-5.3-2.6-9.4-2.6h-11v20.4h11C182.2,49.3,185.3,48.4,187.4,46.6z"/>
+				<path class="st5" d="M234.1,63v5.6h-32.9V23.2h32v5.6h-25.5v13.9h22.7v5.5h-22.7V63H234.1z"/>
+				<path class="st5" d="M245.8,66.1c-3.7-2-6.5-4.8-8.6-8.3c-2.1-3.5-3.1-7.5-3.1-11.9c0-4.4,1-8.4,3.1-11.9
+					c2.1-3.5,4.9-6.3,8.6-8.3c3.7-2,7.8-3,12.3-3c3.5,0,6.8,0.6,9.7,1.8c2.9,1.2,5.4,2.9,7.5,5.3l-4.2,4.1
+					c-3.4-3.6-7.7-5.4-12.8-5.4c-3.4,0-6.4,0.8-9.1,2.3c-2.7,1.5-4.8,3.6-6.4,6.3c-1.5,2.7-2.3,5.6-2.3,8.9c0,3.3,0.8,6.3,2.3,8.9
+					c1.5,2.7,3.7,4.7,6.4,6.3c2.7,1.5,5.8,2.3,9.1,2.3c5.1,0,9.3-1.8,12.8-5.4l4.2,4.1c-2.1,2.3-4.6,4.1-7.5,5.3
+					c-3,1.2-6.2,1.8-9.8,1.8C253.5,69.1,249.4,68.1,245.8,66.1z"/>
+				<path class="st5" d="M300.8,52.9v15.7h-6.4V52.8l-18-29.5h6.9l14.5,23.9l14.6-23.9h6.4L300.8,52.9z"/>
+			</g>
+		</g>
+	</g>
+	<g>
+		<path class="st12" d="M491.9,58.8c0.9,0.5,1.6,1.2,2.1,2.1c0.5,0.9,0.8,1.8,0.8,2.9c0,1.1-0.3,2-0.8,2.9c-0.5,0.9-1.2,1.6-2.1,2.1
+			c-0.9,0.5-1.8,0.8-2.9,0.8c-1.1,0-2-0.3-2.9-0.8c-0.9-0.5-1.6-1.2-2.1-2.1c-0.5-0.9-0.8-1.8-0.8-2.9c0-1.1,0.3-2,0.8-2.9
+			c0.5-0.9,1.2-1.6,2.1-2.1c0.9-0.5,1.8-0.8,2.9-0.8C490,58,491,58.3,491.9,58.8z M491.5,68c0.7-0.4,1.3-1,1.8-1.8
+			c0.4-0.8,0.6-1.6,0.6-2.5c0-0.9-0.2-1.8-0.6-2.5c-0.4-0.8-1-1.3-1.8-1.8c-0.7-0.4-1.6-0.6-2.5-0.6c-0.9,0-1.8,0.2-2.5,0.6
+			c-0.7,0.4-1.3,1-1.8,1.8c-0.4,0.8-0.6,1.6-0.6,2.5c0,0.9,0.2,1.8,0.6,2.5c0.4,0.8,1,1.4,1.8,1.8c0.7,0.4,1.6,0.7,2.5,0.7
+			C489.9,68.7,490.7,68.5,491.5,68z M491.1,65.1l1.1,2h-1.6l-1.2-2.2c-0.1-0.2-0.2-0.3-0.3-0.4c-0.1-0.1-0.3-0.1-0.5-0.1h-0.7v2.6
+			h-1.4v-6.8h2.9c0.8,0,1.4,0.2,1.8,0.5c0.4,0.4,0.6,0.9,0.6,1.5c0,0.5-0.1,0.9-0.4,1.3c-0.3,0.3-0.7,0.6-1.2,0.7
+			C490.5,64.5,490.8,64.7,491.1,65.1z M490.1,63.2c0.2-0.2,0.3-0.4,0.3-0.7c0-0.3-0.1-0.6-0.3-0.7c-0.2-0.2-0.5-0.2-0.9-0.2h-1.3
+			v1.9h1.3C489.6,63.4,489.9,63.3,490.1,63.2z"/>
+	</g>
+</g>
+</svg>
+  </div>
+  <div class="topbar-right no-print">
+    <span class="tag-pill">Análisis Ambiental</span>
+    <button class="btn btn-secondary btn-sm" onclick="exportPDF()">
+      <i data-feather="download"></i> Exportar PDF
+    </button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Breadcrumb + Header -->
+  <div class="breadcrumb">
+    Inicio
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 9l3-3-3-3" stroke="#98A2B3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Residuos Asimilables a Domiciliarios</span>
+  </div>
+  <div class="page-title">Generación de residuos por tienda · Sodimac Chile</div>
+  <div class="page-sub">Toneladas por millón de pesos vendido (T/MM) · 70 establecimientos</div>
+
+  <!-- Metric cards -->
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-label">Tiendas analizadas</div>
+      <div class="metric-value mv-brand">70</div>
+      <div class="metric-sub">HC + CO</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--brand)"></div></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Mayor T/MM</div>
+      <div class="metric-value mv-danger">23,0</div>
+      <div class="metric-sub">HC Arica (CC 32)</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--error)"></div></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Menor T/MM</div>
+      <div class="metric-value mv-success">3,3</div>
+      <div class="metric-sub">HC Angol (CC 58)</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:14%;background:var(--success)"></div></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Promedio red</div>
+      <div class="metric-value">9,9</div>
+      <div class="metric-sub">T/MM promedio</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:43%;background:var(--brand)"></div></div>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+    <div class="tabs no-print">
+      <button class="tab active" onclick="showTab('chart',this)">Gráfico</button>
+      <button class="tab" onclick="showTab('table',this)">Tabla de datos</button>
+      <button class="tab" onclick="showTab('factors',this)">Factores de eficiencia</button>
+    </div>
+
+    <!-- Tab: Chart -->
+    <div id="tab-chart" class="tab-panel active">
+      <div class="card-header">
+        <div class="card-title">T/MM por establecimiento · ordenado de mayor a menor</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#F04438"></div>Alto (&ge;15)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F79009"></div>Medio (5–15)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#039855"></div>Eficiente (&le;5)</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" id="chartWrap1" style="height:966px;">
+          <canvas id="mainChart" role="img" aria-label="Gráfico horizontal T/MM por tienda Sodimac (parte 1)"></canvas>
+        </div>
+        <div class="chart-wrap" id="chartWrap2" style="height:684px;margin-top:8px;">
+          <canvas id="mainChart2" role="img" aria-label="Gráfico horizontal T/MM por tienda Sodimac (parte 2)"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Table -->
+    <div id="tab-table" class="tab-panel">
+      <div class="card-header">
+        <div class="card-title">Detalle por establecimiento</div>
+        <div style="font-size:11px;color:var(--text-disabled);font-weight:500">Clic en encabezados para ordenar</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('cc')" data-col="cc">CC SAP <span class="si">↕</span></th>
+              <th onclick="sortTable('name')" data-col="name">Establecimiento <span class="si">↕</span></th>
+              <th class="num" onclick="sortTable('ventas')" data-col="ventas">Ventas (MM$) <span class="si">↕</span></th>
+              <th class="num" onclick="sortTable('gen')" data-col="gen">Generación (t) <span class="si">↕</span></th>
+              <th class="num sort-desc" onclick="sortTable('ratio')" data-col="ratio">T/MM <span class="si">↓</span></th>
+              <th onclick="sortTable('level')" data-col="level">Nivel <span class="si">↕</span></th>
+              <th class="no-print">Intensidad</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Factors -->
+    <div id="tab-factors" class="tab-panel">
+      <div class="card-header">
+        <div class="card-title">Factores para reducir la generación de residuos</div>
+      </div>
+      <div class="card-body">
+        <div class="insight">
+          <i data-feather="info" style="color:var(--brand);flex-shrink:0;width:16px;height:16px;margin-top:1px"></i>
+          Con solo datos de <strong>ventas y generación</strong>, el ratio T/MM es el único indicador comparable entre tiendas. Las diferencias entre establecimientos del mismo formato revelan oportunidades operacionales concretas.
+        </div>
+        <div class="factors-grid">
+          <div class="factor-card fc1">
+            <div class="factor-num">01 · Formato de tienda</div>
+            <div class="factor-title">CO vs HC</div>
+            <div class="factor-body">Los Centros de Operaciones (CO Cantagallo 18,7 · CO Antofagasta 19,5 · CO Reñaca 13,1) muestran ratios más altos. Su modelo operacional implica mayor movimiento de embalajes con menor venta directa al público.</div>
+            <div><span class="factor-tag">Separar benchmarks por formato</span></div>
+          </div>
+          <div class="factor-card fc2">
+            <div class="factor-num">02 · Escala de ventas</div>
+            <div class="factor-title">Economías de escala</div>
+            <div class="factor-body">Tiendas con ventas muy bajas (HC Cauquenes $280MM, HC Viña del Mar $1.121MM) tienen infraestructura similar a tiendas grandes pero menos ventas para diluir los residuos. El ratio se distorsiona.</div>
+            <div><span class="factor-tag" style="background:#EDEFFD;color:#3E4784">Segmentar por tramo de ventas</span></div>
+          </div>
+          <div class="factor-card fc3">
+            <div class="factor-num">03 · Gestión de embalajes</div>
+            <div class="factor-title">Mayor fuente de residuos</div>
+            <div class="factor-body">En retail de mejoramiento del hogar, el cartón y plástico de recepción es la principal fuente. Tiendas con alto T/MM probablemente no tienen acuerdos de devolución con proveedores o compactación eficiente.</div>
+            <div><span class="factor-tag" style="background:var(--error-light);color:#B42318">Alta palanca de reducción</span></div>
+          </div>
+          <div class="factor-card fc4">
+            <div class="factor-num">04 · Segregación en origen</div>
+            <div class="factor-title">Calidad del dato y valorización</div>
+            <div class="factor-body">Sin segregación, materiales valorizables (cartón, plástico) se mezclan con basura, inflando el peso reportado. Una tienda que no segrega puede parecer ineficiente aunque genere lo mismo que una que sí lo hace.</div>
+            <div><span class="factor-tag" style="background:var(--warning-light);color:#B54708">Impacto en dato y en costo</span></div>
+          </div>
+          <div class="factor-card fc5">
+            <div class="factor-num">05 · Benchmarking entre pares</div>
+            <div class="factor-title">La mayor oportunidad disponible</div>
+            <div class="factor-body">HC Angol (3,3) vs HC Temuco Cautín (6,6) con ventas similares duplican el ratio. HC Arica (23,0) vs HC Coquimbo (12,0) también divergen. Esa brecha es la pregunta clave: ¿qué hace distinto cada tienda?</div>
+            <div><span class="factor-tag" style="background:var(--success-light);color:#027A48">Acción inmediata con datos actuales</span></div>
+          </div>
+          <div class="factor-card fc6">
+            <div class="factor-num">06 · Variables no disponibles</div>
+            <div class="factor-title">Limitante del dataset</div>
+            <div class="factor-body">Para un análisis más robusto se necesitaría: m² de sala de venta, dotación de personal, antigüedad de la tienda, y si existe programa de compactación o valorización activo.</div>
+            <div><span class="factor-tag" style="background:var(--gray-100);color:var(--gray-600)">Datos a incorporar</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Recylink · Sodimac Chile · Residuos asimilables a domiciliarios · 70 establecimientos</div>
+</div>
+
+<script>
+const raw = [
+  [3,"CO Viña del Mar",692,5527,8.0],[4,"HC La Calera",2053,15136,7.4],[5,"HC Antofagasta",2499,24125,9.7],
+  [7,"HC Osorno",3904,41399,10.6],[9,"HC Los Angeles",3658,16531,4.5],[11,"HC Iquique",2758,20613,7.5],
+  [12,"HC San Miguel",2392,25883,10.8],[16,"HC San Felipe",2430,15801,6.5],[19,"HC Valdivia",3140,32017,10.2],
+  [20,"HC Viña del Mar",1121,4708,4.2],[21,"CO Cantagallo",905,16899,18.7],[23,"HC San Bernardo",2788,27370,9.8],
+  [24,"HC Punta Arenas",2483,30360,12.2],[26,"CO Rancagua",1026,7705,7.5],[27,"HC Calama",3109,19582,6.3],
+  [32,"HC Arica",2619,60267,23.0],[34,"HC Las Condes",2121,20871,9.8],[37,"HC Coyhaique",3347,40295,12.0],
+  [39,"HC La Serena",3519,26517,7.5],[40,"CO Antofagasta",1608,31307,19.5],[41,"HC Puerto Montt",3774,28414,7.5],
+  [43,"HC Talca",3097,13750,4.4],[44,"HC Temuco Cauti",4351,28931,6.6],[51,"HC Chillan",3107,17749,5.7],
+  [54,"HC Nva La Flor",2273,32606,14.3],[55,"HC Linares",1839,11293,6.1],[57,"HC Copiapo",2494,18695,7.5],
+  [58,"HC Angol",1733,5676,3.3],[63,"HC Huechuraba N",3199,40267,12.6],[66,"HC Ñuble",3127,36127,11.6],
+  [67,"HC La Reina",2494,34878,14.0],[68,"HC Cauquenes",280,2073,7.4],[70,"HC Est Central",1456,15147,10.4],
+  [74,"HC El Bosque",1810,28691,15.8],[75,"HC Puente Alto",3538,41583,11.8],[79,"HC P Arauco",3038,20246,6.7],
+  [81,"HC Conce El Tre",2584,14239,5.5],[83,"HC Rancagua",2546,27753,10.9],[88,"HC Maipu",3550,35299,9.9],
+  [90,"HC Quilpue",2983,21184,7.1],[93,"HC El Trebol",4659,38145,8.2],[95,"HC Vespucio",2005,21231,10.6],
+  [96,"HC Cerrillos",3134,35399,11.3],[97,"CO Reñaca",2153,28118,13.1],[98,"HC Coquimbo",2133,25640,12.0],
+  [713,"HC San Antonio",1804,18078,10.0],[714,"HC Melipilla",1499,18173,12.1],[716,"HC Santa Cruz",1316,10972,8.3],
+  [723,"HC Quilicura",1688,27370,16.2],[724,"HC Melipilla",2552,18018,7.1],[725,"HC Quinta Verg",1532,13679,8.9],
+  [726,"HC Tobalaba",2081,21867,10.5],[727,"HC Talca Ponien",1656,16607,10.0],[728,"HC Alto Hospici",1061,8932,8.4],
+  [729,"HC Ovalle",1706,14979,8.8],[730,"HC Coronel",2070,14581,7.0],[731,"HC San Fernando",1777,16687,9.4],
+  [734,"HC Quillota",1478,10904,7.4],[737,"HC Talagan Peña",1985,29046,14.6],[738,"HC Los Dominico",1299,15123,11.6],
+  [739,"HC Copiapo II",1378,12330,8.9],[741,"HC Vallenar",1831,16947,9.3],[742,"HC La Serena Bal",2422,23589,9.7],
+  [743,"HC Antofagast II",2132,23610,11.1],[745,"HC Independencia",1287,16011,12.4],[746,"HC Quilín",1213,11013,9.1],
+  [747,"HC Temuco Los Pablos",2145,17672,8.2],[753,"HC Maitencillo",1534,14075,9.2],[754,"Hc Villarrica II",3323,27525,8.3]
+];
+const data = raw.map(([cc,name,ventas,gen,ratio]) => ({cc,name,ventas,gen,ratio}));
+const maxRatio = Math.max(...data.map(d => d.ratio));
+const sortedDesc = [...data].sort((a,b) => b.ratio - a.ratio);
+
+// Chart — split 70 stores into two canvases (42 + 28) for clean print pagination
+const SPLIT = 42;
+const part1 = sortedDesc.slice(0, SPLIT);
+const part2 = sortedDesc.slice(SPLIT);
+
+// Shared X axis max — round up to nearest 5 so both charts have identical scale
+const xMax = Math.ceil(maxRatio / 5) * 5;
+
+const chartCfg = (items) => ({
+  type: 'bar',
+  data: {
+    labels: items.map(d => d.name),
+    datasets: [{
+      label: 'T/MM',
+      data: items.map(d => d.ratio),
+      backgroundColor: items.map(d => d.ratio >= 15 ? '#F04438' : d.ratio <= 5 ? '#039855' : '#F79009'),
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    layout: { padding: { right: 10 } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1D2939', titleColor: '#fff', bodyColor: '#98A2B3',
+        padding: 10, cornerRadius: 8,
+        titleFont: { family: 'Plus Jakarta Sans', size: 13, weight: '600' },
+        bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+        callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)} t/MM$` }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: xMax,
+        grid: { color: '#F2F4F7' },
+        ticks: { color: '#98A2B3', font: { family: 'Plus Jakarta Sans', size: 11 }, callback: v => v + ' t' },
+        title: { display: true, text: 'Toneladas por MM$ vendido', color: '#667085', font: { family: 'Plus Jakarta Sans', size: 11 } }
+      },
+      y: {
+        grid: { display: false },
+        ticks: {
+          color: '#475467',
+          font: { family: 'Plus Jakarta Sans', size: 11 },
+          mirror: false,
+          maxTicksLimit: 50
+        },
+        afterFit(scale) {
+          scale.width = 160; // fixed label column — prevents label area from eating bar space
+        }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById('mainChart'),  chartCfg(part1));
+new Chart(document.getElementById('mainChart2'), chartCfg(part2));
+
+// Table
+const tbody = document.getElementById('tableBody');
+let sortCol = 'ratio', sortDir = -1;
+
+function levelOf(r) { return r >= 15 ? 'alto' : r <= 5 ? 'eficiente' : 'medio'; }
+function levelNum(r) { return r >= 15 ? 3 : r <= 5 ? 1 : 2; }
+
+function renderTable(rows) {
+  tbody.innerHTML = '';
+  rows.forEach(d => {
+    const lv = levelOf(d.ratio);
+    const label = { alto: 'Alto', medio: 'Medio', eficiente: 'Eficiente' }[lv];
+    const pct = (d.ratio / maxRatio * 100).toFixed(0);
+    const barColor = d.ratio >= 15 ? '#F04438' : d.ratio <= 5 ? '#039855' : '#F79009';
+    tbody.innerHTML += `<tr>
+      <td><span class="cc-badge">${d.cc}</span></td>
+      <td class="store-name">${d.name}</td>
+      <td class="num">$${d.ventas.toLocaleString('es-CL')}</td>
+      <td class="num">${d.gen.toLocaleString('es-CL')}</td>
+      <td class="num"><strong>${d.ratio.toFixed(1)}</strong></td>
+      <td><span class="badge ${lv}">${label}</span></td>
+      <td class="no-print"><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div></div></td>
+    </tr>`;
+  });
+}
+
+function sortTable(col) {
+  if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = col === 'name' ? 1 : -1; }
+  const s = [...data].sort((a,b) => {
+    if (col === 'name') return sortDir * a.name.localeCompare(b.name, 'es');
+    if (col === 'level') return sortDir * (levelNum(a.ratio) - levelNum(b.ratio));
+    return sortDir * (a[col] - b[col]);
+  });
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    th.querySelector('.si').textContent = '↕';
+  });
+  const active = document.querySelector(`th[data-col="${col}"]`);
+  if (active) {
+    active.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+    active.querySelector('.si').textContent = sortDir === 1 ? '↑' : '↓';
+  }
+  renderTable(s);
+}
+
+renderTable(sortedDesc);
+
+// Tabs
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// PDF export — resize charts to exact print dimensions before printing
+async function exportPDF() {
+  const btn = document.querySelector('[onclick="exportPDF()"]');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-feather="loader"></i> Generando...';
+  if (typeof feather !== 'undefined') feather.replace();
+
+  const { jsPDF } = window.jspdf;
+  // Letter portrait: 215.9 x 279.4 mm
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  const PW = 215.9, PH = 279.4;
+  const margin = 12;
+  const usableW = PW - margin * 2;
+  let y = margin;
+
+  // Helper: add canvas as image
+  const addCanvasImg = (canvas, pdfY, pdfH) => {
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    pdf.addImage(imgData, 'PNG', margin, pdfY, usableW, pdfH);
+  };
+
+  // Helper: render a DOM element to canvas via html2canvas
+  const domToCanvas = async (el, scale = 2) => {
+    const { default: h2c } = await import('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.esm.min.js')
+      .catch(() => null);
+    if (!h2c) return null;
+    return h2c(el, { scale, useCORS: true, logging: false, backgroundColor: '#ffffff' });
+  };
+
+  // ── PAGE 1: Header + Metrics ──
+  const headerEl = document.querySelector('.page-header');
+  const metricsEl = document.querySelector('.metrics');
+
+  // Capture header
+  const headerCanvas = await domToCanvas(headerEl);
+  if (headerCanvas) {
+    const hRatio = headerCanvas.height / headerCanvas.width;
+    const hH = usableW * hRatio;
+    addCanvasImg(headerCanvas, y, hH);
+    y += hH + 5;
+  }
+
+  // Capture metrics
+  const metricsCanvas = await domToCanvas(metricsEl);
+  if (metricsCanvas) {
+    const mRatio = metricsCanvas.height / metricsCanvas.width;
+    const mH = usableW * mRatio;
+    addCanvasImg(metricsCanvas, y, mH);
+    y += mH + 5;
+  }
+
+  // ── Chart card header
+  const chartHeaderEl = document.querySelector('#tab-chart .card-header');
+  const chCanvas = await domToCanvas(chartHeaderEl);
+  if (chCanvas) {
+    const chRatio = chCanvas.height / chCanvas.width;
+    const chH = usableW * chRatio;
+    addCanvasImg(chCanvas, y, chH);
+    y += chH + 3;
+  }
+
+  // ── PAGE 2: Chart part 1 (42 bars) ──
+  pdf.addPage();
+  const c1 = document.getElementById('mainChart');
+  const chart1H = 966; // px height
+  // Resize to fixed width for capture
+  const chart1 = Chart.getChart(c1);
+  chart1.resize(700, chart1H);
+  await new Promise(r => setTimeout(r, 200));
+  const img1Data = c1.toDataURL('image/png', 1.0);
+  const c1Ratio = chart1H / 700;
+  pdf.addImage(img1Data, 'PNG', margin, margin, usableW, usableW * c1Ratio);
+  chart1.resize(); // restore
+
+  // ── PAGE 3: Chart part 2 (28 bars) ──
+  pdf.addPage();
+  const c2 = document.getElementById('mainChart2');
+  const chart2H = 684;
+  const chart2 = Chart.getChart(c2);
+  chart2.resize(700, chart2H);
+  await new Promise(r => setTimeout(r, 200));
+  const img2Data = c2.toDataURL('image/png', 1.0);
+  const c2Ratio = chart2H / 700;
+  pdf.addImage(img2Data, 'PNG', margin, margin, usableW, usableW * c2Ratio);
+  chart2.resize();
+
+  // ── PAGES 4+: Table ──
+  pdf.addPage();
+  const tableEl = document.getElementById('tab-table');
+  tableEl.style.display = 'block';
+  const tableCanvas = await domToCanvas(tableEl, 1.5);
+  tableEl.style.display = '';
+  if (tableCanvas) {
+    const tRatio = tableCanvas.height / tableCanvas.width;
+    const totalTableH = usableW * tRatio;
+    const pageH = PH - margin * 2;
+    let tY = 0;
+    let page = 0;
+    while (tY < totalTableH) {
+      if (page > 0) pdf.addPage();
+      // Clip: draw portion of tableCanvas onto page
+      const tempCanvas = document.createElement('canvas');
+      const pixPerMm = tableCanvas.width / usableW;
+      const sliceH = Math.min(pageH * pixPerMm, tableCanvas.height - tY * pixPerMm);
+      tempCanvas.width = tableCanvas.width;
+      tempCanvas.height = sliceH;
+      tempCanvas.getContext('2d').drawImage(tableCanvas, 0, tY * pixPerMm, tableCanvas.width, sliceH, 0, 0, tableCanvas.width, sliceH);
+      pdf.addImage(tempCanvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, usableW, sliceH / pixPerMm);
+      tY += pageH;
+      page++;
+    }
+  }
+
+  // ── LAST PAGE: Factors ──
+  pdf.addPage();
+  const factorsEl = document.getElementById('tab-factors');
+  factorsEl.style.display = 'block';
+  const factorsCanvas = await domToCanvas(factorsEl, 1.5);
+  factorsEl.style.display = '';
+  if (factorsCanvas) {
+    const fRatio = factorsCanvas.height / factorsCanvas.width;
+    pdf.addImage(factorsCanvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, usableW, usableW * fRatio);
+  }
+
+  pdf.save('Analisis_Residuos_Sodimac.pdf');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i data-feather="download"></i> Exportar PDF';
+  if (typeof feather !== 'undefined') feather.replace();
+}
+
+
+
+// Feather icons
+if (typeof feather !== 'undefined') feather.replace();
+</script>
+</body>
+</html>
